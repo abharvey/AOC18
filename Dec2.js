@@ -1,42 +1,53 @@
-const { input } = require("./inputs/dec2-dumb.js");
+const { input } = require("./inputs/dec2.js");
 
 function checkForDupe(substring, char) {
   for (let i = 1; i < substring.length; i++) {
     if (char === substring[i]) {
-      console.log(`found match of ${char} @ ${i}`);
       return i;
     }
   }
-  return false;
+  return -1;
 }
 
 function checkDupAndTrip(str) {
-  console.log("testing: ", str);
-  let hasDupe = false;
-  let hasTrip = false;
+  //console.log("***testing*** : ", str);
+  let duplicate = "";
+  let triplicate = "";
+
+  // Tried to be far too fast with the forward search, made the checks more complex
+  //   think data structure usage next time
   for (let i = 0; i < str.length; i++) {
     const char = str[i];
-    const substring = str.substring(i);
 
-    // Lazy dup rechecks
-    const dupIndex = checkForDupe(substring, char) || false;
-    const hasTrip =
-      dupIndex && checkForDupe(substring.substring(dupIndex), char);
+    if (!str.substring(0, i).includes(char) && triplicate !== char) {
+      const searchString = str.substring(i);
+      // Lazy dup check
+      let dupIndex = checkForDupe(searchString, char);
 
-    if (hasTrip) {
-      break;
-    }
-
-    if (dupIndex) {
-      hasDupe = true;
-      break;
+      if (dupIndex > 0) {
+        const searchForTripString = searchString.substring(dupIndex);
+        const tripIndex = checkForDupe(searchForTripString, char);
+        if (tripIndex > 0) {
+          if (
+            checkForDupe(searchForTripString.substring(tripIndex), char) < 0
+          ) {
+            triplicate = char;
+          }
+        } else {
+          duplicate = char;
+        }
+      }
+    } else {
+      //console.log("done with", char);
     }
   }
 
-  return {
-    hasDupe,
-    hasTrip
+  const ret = {
+    hasDupe: !!duplicate,
+    hasTrip: !!triplicate
   };
+  //console.log(ret);
+  return ret;
 }
 
 (function dec2Part1(inputArr) {
@@ -53,5 +64,10 @@ function checkDupAndTrip(str) {
       triplicateCount++;
     }
   }
-  console.log("checksum: ", duplicateCount * triplicateCount);
+  console.log(
+    "checksum: ",
+    duplicateCount,
+    triplicateCount,
+    duplicateCount * triplicateCount
+  );
 })(input);
