@@ -1,44 +1,40 @@
 const { input } = require("./inputs/dec2-dumb.js");
 
+function checkForDupe(substring, char) {
+  for (let i = 1; i < substring.length; i++) {
+    if (char === substring[i]) {
+      console.log(`found match of ${char} @ ${i}`);
+      return i;
+    }
+  }
+  return false;
+}
+
 function checkDupAndTrip(str) {
   console.log("testing: ", str);
-  let hasDup = false;
+  let hasDupe = false;
   let hasTrip = false;
-  for (let searchIndex = 0; searchIndex < str.length; searchIndex++) {
-    const char = str[searchIndex];
-    for (
-      let duplicateSearch = searchIndex + 1;
-      duplicateSearch < str.length;
-      duplicateSearch++
-    ) {
-      if (char === str[duplicateSearch]) {
-        hasDup = true;
-        console.log(`duplicate of ${char} @ ${duplicateSearch}`);
-        for (
-          let triplicateSearch = duplicateSearch + 1;
-          triplicateSearch < str.length;
-          triplicateSearch++
-        ) {
-          if (char === str[triplicateSearch]) {
-            console.log(`triplicate of ${char} @ ${triplicateSearch}`);
-            hasTrip = true;
-            hasDup = false;
-            break;
-          }
-        }
-        break;
-      }
-      if (hasTrip) {
-        break;
-      }
+  for (let i = 0; i < str.length; i++) {
+    const char = str[i];
+    const substring = str.substring(i);
+
+    // Lazy dup rechecks
+    const dupIndex = checkForDupe(substring, char) || false;
+    const hasTrip =
+      dupIndex && checkForDupe(substring.substring(dupIndex), char);
+
+    if (hasTrip) {
+      break;
     }
-    if (hasDup) {
+
+    if (dupIndex) {
+      hasDupe = true;
       break;
     }
   }
 
   return {
-    hasDup,
+    hasDupe,
     hasTrip
   };
 }
@@ -50,7 +46,7 @@ function checkDupAndTrip(str) {
   for (let i = 0; i < input.length; i++) {
     const boxId = input[i];
     const hasDT = checkDupAndTrip(boxId);
-    if (hasDT.hasDup) {
+    if (hasDT.hasDupe) {
       duplicateCount++;
     }
     if (hasDT.hasTrip) {
