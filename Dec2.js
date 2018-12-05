@@ -1,4 +1,4 @@
-const { input } = require("./inputs/dec2.js");
+const { getInput } = require("./inputs/readInput");
 
 function checkForDupe(substring, char) {
   for (let i = 1; i < substring.length; i++) {
@@ -50,12 +50,12 @@ function checkDupAndTrip(str) {
   return ret;
 }
 
-(function dec2Part1(inputArr) {
+function dec2Part1(inputArr) {
   let duplicateCount = 0;
   let triplicateCount = 0;
 
-  for (let i = 0; i < input.length; i++) {
-    const boxId = input[i];
+  for (let i = 0; i < inputArr.length; i++) {
+    const boxId = inputArr[i];
     const hasDT = checkDupAndTrip(boxId);
     if (hasDT.hasDupe) {
       duplicateCount++;
@@ -70,4 +70,6 @@ function checkDupAndTrip(str) {
     triplicateCount,
     duplicateCount * triplicateCount
   );
-})(input);
+}
+
+getInput("input.txt", dec2Part1);
