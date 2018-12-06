@@ -6,7 +6,7 @@ function initializeFabric(fabricSize) {
   for (let i = 0; i <= fabricSize[0]; i++) {
     const row = [];
     for (let j = 0; j <= fabricSize[1]; j++) {
-      row.push(0);
+      row.push(null);
     }
     fabric.push(row);
   }
@@ -15,14 +15,17 @@ function initializeFabric(fabricSize) {
 
 function dec3(input) {
   const patches = input.map(line => {
+    const id = line.match(/#[0-9]*/)[0];
     const coordinates = line.match(/[0-9]*,[0-9]*/)[0];
     const dimensions = line.match(/[0-9]*x[0-9]*/)[0];
 
     return {
+      id,
       x: parseInt(coordinates.split(",")[0], 10),
       y: parseInt(coordinates.split(",")[1], 10),
       w: parseInt(dimensions.split("x")[0], 10),
-      h: parseInt(dimensions.split("x")[1], 10)
+      h: parseInt(dimensions.split("x")[1], 10),
+      overlapping: false
     };
   });
 
@@ -47,18 +50,24 @@ function dec3(input) {
     if (patch) {
       for (let i = patch.x; i < patch.w + patch.x; i++) {
         for (let j = patch.y; j < patch.h + patch.y; j++) {
-          fabric[i][j] += 1;
+          if (fabric[i][j]) {
+            fabric[i][j].overlapping = true;
+            patch.overlapping = true;
+          }
+          fabric[i][j] = patch;
         }
       }
     }
   }
   //   console.table(fabric);
 
-  const overlap = fabric.reduce(
-    (sum, row) => sum + row.reduce((s, c) => (c > 1 ? s + 1 : s), 0),
-    0
-  );
-  console.info(overlap);
+  //   const overlap = fabric.reduce(
+  //     (sum, row) => sum + row.reduce((s, c) => (c > 1 ? s + 1 : s), 0),
+  //     0
+  //   );
+  //   console.info(overlap);
+  const noOverlap = patches.filter(patch => !patch.overlapping);
+  console.log(noOverlap);
 }
 
 getInput("./inputs/dec3.txt", dec3);
