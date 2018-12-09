@@ -24,14 +24,18 @@ function removeDoneValue(val, obj) {
     }, {});
 }
 
-function getDoables(obj) {
+function getDoables(obj, workers) {
     return Object.keys(obj).reduce((doables, key) => {
         if (obj[key].length === 0) {
             doables.push(key);
         }
 
         return doables;
-    }, []);
+    }, []).filter(t => !tasksInProgress(workers).includes(t));
+}
+
+function tasksInProgress(workers) {
+    return workers.filter(w => w.task).map(w => w.task);
 }
 
 function removeDone(did, obj) {
@@ -41,7 +45,7 @@ function removeDone(did, obj) {
 }
 
 function computeDuration(task) {
-    return (task.toLowerCase().charCodeAt(0) - 96);
+    return 60 + (task.toLowerCase().charCodeAt(0) - 96);
 }
 
 function performWork(time, workers) {
@@ -91,14 +95,14 @@ function haveWorkToDo(workers) {
 function dec7(input) {
     let instructions = input.map(getToFrom);
     const order = [];
-    let workers = initWorkers(2);
+    let workers = initWorkers(5);
     const required = requiredObject(instructions);
 
     let currentTime = 0;
     let newReq = required;
     while (Object.keys(newReq).length > 0 || haveWorkToDo(workers)) {
         // if there are tasks
-        const toDos = getDoables(newReq);
+        const toDos = getDoables(newReq, workers);
         for (let i = 0; i < toDos.length; i++) {
             const toDo = toDos[i];
             // if there are available workers
@@ -107,28 +111,30 @@ function dec7(input) {
                 // assign task to a worker
                 worker.task = toDo;
                 worker.timeRemaining = computeDuration(toDo);
-                newReq = removeDone(toDo, removeDoneValue(toDo, newReq));
             } else {
                 break;
             } //else don't do work yet so break;
         }
-        // console.log(workers);
+        console.log(workers);
         // 'wait' for next task to complete
         const waitInterval = nextInterval(workers);
-        // console.log('Current Time:', currentTime, 'sec');
-        // console.log('Next Tick Duration:', waitInterval);
+        console.log('Current Time:', currentTime, 'sec');
+        console.log('Next Tick Duration:', waitInterval);
         // perform work, add work performed to current time
         workers = performWork(waitInterval, workers);
         currentTime += waitInterval;
-        // console.log('Work Completed @', currentTime, 'sec');
+        console.log('Work Completed @', currentTime, 'sec');
 
         // clear completed work and add to the completed order
-
-        order.push(getCompletedWork(workers));
+        const completed = getCompletedWork(workers);
+        for (let i = 0; i < completed.length; i++) {
+            newReq = removeDone(completed[i], removeDoneValue(completed[i], newReq));
+            order.push(completed[i]);
+        }
         workers = clearCompletedWork(workers);
     }
 
     console.log(order.join(""), currentTime);
 }
 
-getInput("./test.txt", dec7);
+getInput("./dec7.txt", dec7);
