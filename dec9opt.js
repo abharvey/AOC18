@@ -68,9 +68,9 @@ const playGame = (playerCount, marbles) => {
   const circle = new Array(marbles + 1).fill(0); // pre allocate required memory
   let circleSize = 1; // size of array as the elves see the circle
   for (let i = 1; i < marbles + 1; i++) {
-    if (i % 10000 === 0) {
-      console.log(i / 10000, "...", (Date.now() - startTime) / 1000);
-    }
+    // if (i % 10000 === 0) {
+    //   console.log(i / 10000, "...", (Date.now() - startTime) / 1000);
+    // }
     //current player takes Turn
     if (i % 23 === 0) {
       // add to score
@@ -102,7 +102,7 @@ const playGame = (playerCount, marbles) => {
 };
 
 function dec9(input) {
-  console.log(input[0]);
+  //   console.log(input[0]);
   const gameInput = input[0]
     .replace(" points", "")
     .split(" players; last marble is worth ")
@@ -111,7 +111,7 @@ function dec9(input) {
   const score = playGame(...gameInput);
 }
 
-console.log(playGame(455, 7122300));
+console.log(playGame(455, 71975));
 // getInput("./dec9.txt", dec9);
 
 module.exports = {
