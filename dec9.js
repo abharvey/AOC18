@@ -44,6 +44,7 @@ const playGame = (playerCount, marbles) => {
   let currentPlayer = 0;
 
   let currentMarble = 0;
+  //   const roundTable = {};
   let circle = [0];
   for (let i = 1; i < marbles + 1; i++) {
     if (i % 10000 === 0) {
@@ -64,7 +65,9 @@ const playGame = (playerCount, marbles) => {
       currentMarble = placementResult.nextPosition;
     }
     currentPlayer = nextPlayer(currentPlayer, players);
+    // roundTable[i] = [...circle];
   }
+  //   console.table(roundTable);
   console.log((Date.now() - startTime) / 1000);
   return players.sort().reverse()[0];
 };
@@ -80,7 +83,7 @@ function dec9(input) {
   console.log(score);
 }
 
-playGame(455, 71223);
+console.log(playGame(455, 71223));
 // getInput("./dec9.txt", dec9);
 
 module.exports = {

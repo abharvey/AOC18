@@ -1,20 +1,24 @@
 const { getInput } = require("./readInput.js");
 
-const spliceRem = function(arr, index, circleSize) {
-  while (index < circleSize) {
-    arr[index] = arr[index + 1];
-    index++;
+const spliceRem = function(circle, currentMarble, circleSize) {
+  let i = currentMarble;
+  while (i < circleSize) {
+    circle[i] = circle[i + 1];
+    i++;
   }
 };
 
-const spliceAdd = function(arr, index, item, circleSize) {
-  console.log(arr);
-  let i = index;
-  while (i <= circleSize) {
-    arr[i + 1] = arr[index];
+const spliceAdd = function(circle, newMarblePosition, newMarble, circleSize) {
+  let i = newMarblePosition + 1;
+  let lastValue = circle[i - 1];
+  let tempValue = 0;
+  while (i < circleSize + 1) {
+    tempValue = circle[i];
+    circle[i] = lastValue;
+    lastValue = tempValue;
     i++;
   }
-  arr[index] = item;
+  circle[newMarblePosition] = newMarble;
 };
 
 function getNextMarblePosition(currentMarble, circleLength) {
@@ -29,7 +33,6 @@ function getNextMarblePosition(currentMarble, circleLength) {
 
 function addMarbleToCircle(currentMarble, nextMarble, circle, circleSize) {
   const nextPosition = getNextMarblePosition(currentMarble, circleSize);
-
   //   ** Optimize ** don't use splice
   spliceAdd(circle, nextPosition, nextMarble, circleSize);
   return { nextPosition };
@@ -60,7 +63,8 @@ const playGame = (playerCount, marbles) => {
   let currentPlayer = 0;
 
   let currentMarble = 0;
-  // we could pre-allocate, but splice is still the fastest insertion method for JS
+  //   const roundTable = {};
+  // Pre-allocate and don't use build in splice
   const circle = new Array(marbles + 1).fill(0); // pre allocate required memory
   let circleSize = 1; // size of array as the elves see the circle
   for (let i = 1; i < marbles + 1; i++) {
@@ -83,11 +87,15 @@ const playGame = (playerCount, marbles) => {
         circle,
         circleSize
       );
+
       circleSize++;
       currentMarble = placementResult.nextPosition;
     }
+
     currentPlayer = nextPlayer(currentPlayer, players);
+    // roundTable[i] = [...circle];
   }
+  //   console.table(roundTable);
   console.log((Date.now() - startTime) / 1000);
   const score = players.sort().reverse()[0];
   return score;
@@ -103,7 +111,7 @@ function dec9(input) {
   const score = playGame(...gameInput);
 }
 
-console.log(playGame(9, 25));
+console.log(playGame(455, 7122300));
 // getInput("./dec9.txt", dec9);
 
 module.exports = {
