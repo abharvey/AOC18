@@ -1,15 +1,25 @@
-'use strict';
+const errorOverlayMiddleware = require("react-dev-utils/errorOverlayMiddleware");
+const evalSourceMapMiddleware = require("react-dev-utils/evalSourceMapMiddleware");
+const noopServiceWorkerMiddleware = require("react-dev-utils/noopServiceWorkerMiddleware");
+const ignoredFiles = require("react-dev-utils/ignoredFiles");
+const config = require("./webpack.config.dev");
+const paths = require("./paths");
+const fs = require("fs");
 
-const errorOverlayMiddleware = require('react-dev-utils/errorOverlayMiddleware');
-const evalSourceMapMiddleware = require('react-dev-utils/evalSourceMapMiddleware');
-const noopServiceWorkerMiddleware = require('react-dev-utils/noopServiceWorkerMiddleware');
-const ignoredFiles = require('react-dev-utils/ignoredFiles');
-const config = require('./webpack.config.dev');
-const paths = require('./paths');
-const fs = require('fs');
+const protocol = process.env.HTTPS === "true" ? "https" : "http";
+const host = process.env.HOST || "0.0.0.0";
 
-const protocol = process.env.HTTPS === 'true' ? 'https' : 'http';
-const host = process.env.HOST || '0.0.0.0';
+function getInput(filePath, callBack) {
+  const readInput = cb => (error, input) => {
+    if (error) {
+      console.error("ERROR:", error);
+    }
+    const inputArray = input.split("\n");
+    cb(inputArray);
+  };
+
+  fs.readFile(`${filePath}`, "UTF8", readInput(callBack));
+}
 
 module.exports = function(proxy, allowedHost) {
   return {
@@ -30,12 +40,12 @@ module.exports = function(proxy, allowedHost) {
     // specified the `proxy` setting. Finally, we let you override it if you
     // really know what you're doing with a special environment variable.
     disableHostCheck:
-      !proxy || process.env.DANGEROUSLY_DISABLE_HOST_CHECK === 'true',
+      !proxy || process.env.DANGEROUSLY_DISABLE_HOST_CHECK === "true",
     // Enable gzip compression of generated files.
     compress: true,
     // Silence WebpackDevServer's own logs since they're generally not useful.
     // It will still show compile warnings and errors with this setting.
-    clientLogLevel: 'none',
+    clientLogLevel: "none",
     // By default WebpackDevServer serves physical files from current directory
     // in addition to all the virtual build products that it serves from memory.
     // This is confusing because those files won’t automatically be available in
@@ -70,16 +80,16 @@ module.exports = function(proxy, allowedHost) {
     // src/node_modules is not ignored to support absolute imports
     // https://github.com/facebook/create-react-app/issues/1065
     watchOptions: {
-      ignored: ignoredFiles(paths.appSrc),
+      ignored: ignoredFiles(paths.appSrc)
     },
     // Enable HTTPS if the HTTPS environment variable is set to 'true'
-    https: protocol === 'https',
+    https: protocol === "https",
     host,
     overlay: false,
     historyApiFallback: {
       // Paths with dots should still use the history fallback.
       // See https://github.com/facebook/create-react-app/issues/387.
-      disableDotRule: true,
+      disableDotRule: true
     },
     public: allowedHost,
     proxy,
@@ -94,12 +104,70 @@ module.exports = function(proxy, allowedHost) {
       // This lets us open files from the runtime error overlay.
       app.use(errorOverlayMiddleware());
 
+      app.get("/input", function(req, res) {
+        const pixelApi = lines => {
+          const input = lines.reduce(
+            (obj, line) => {
+              const pixel = line
+                .replace("position=<", "")
+                .replace(">", "")
+                .split(" velocity=<");
+
+              const position = pixel[0].split(", ").map(p => parseInt(p, 10));
+              const velocity = pixel[1].split(", ").map(v => parseInt(v, 10));
+              obj.pixels.push({
+                position,
+                velocity
+              });
+              return obj;
+            },
+            { pixels: [] }
+          );
+          res.send(input);
+        };
+
+        getInput("config/api/testinput.txt", pixelApi);
+      });
       // This service worker file is effectively a 'no-op' that will reset any
       // previous service worker registered for the same host:port combination.
       // We do this in development to avoid hitting the production cache if
       // it used the same host and port.
       // https://github.com/facebook/create-react-app/issues/2272#issuecomment-302832432
       app.use(noopServiceWorkerMiddleware());
-    },
+    }
   };
 };
+
+/**
+ * position=< 9,  1> velocity=< 0,  2>
+position=< 7,  0> velocity=<-1,  0>
+position=< 3, -2> velocity=<-1,  1>
+position=< 6, 10> velocity=<-2, -1>
+position=< 2, -4> velocity=< 2,  2>
+position=<-6, 10> velocity=< 2, -2>
+position=< 1,  8> velocity=< 1, -1>
+position=< 1,  7> velocity=< 1,  0>
+position=<-3, 11> velocity=< 1, -2>
+position=< 7,  6> velocity=<-1, -1>
+position=<-2,  3> velocity=< 1,  0>
+position=<-4,  3> velocity=< 2,  0>
+position=<10, -3> velocity=<-1,  1>
+position=< 5, 11> velocity=< 1, -2>
+position=< 4,  7> velocity=< 0, -1>
+position=< 8, -2> velocity=< 0,  1>
+position=<15,  0> velocity=<-2,  0>
+position=< 1,  6> velocity=< 1,  0>
+position=< 8,  9> velocity=< 0, -1>
+position=< 3,  3> velocity=<-1,  1>
+position=< 0,  5> velocity=< 0, -1>
+position=<-2,  2> velocity=< 2,  0>
+position=< 5, -2> velocity=< 1,  2>
+position=< 1,  4> velocity=< 2,  1>
+position=<-2,  7> velocity=< 2, -2>
+position=< 3,  6> velocity=<-1, -1>
+position=< 5,  0> velocity=< 1,  0>
+position=<-6,  0> velocity=< 2,  0>
+position=< 5,  9> velocity=< 1, -2>
+position=<14,  7> velocity=<-2,  0>
+position=<-3,  6> velocity=< 2, -1>
+ */

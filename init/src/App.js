@@ -1,36 +1,55 @@
 import React, { Component } from "react";
 import styled, { keyframes } from "styled-components";
 
+import Pixel from "./Pixel";
+
 const Container = styled.div`
   width: 100%;
   height: 100%;
 `;
 
-const pixel = keyframes`
-    0% { left: 800px; }
-    100% { left: -100px; }
-`;
-
-const Pixel = styled.div`
+const MessageContainer = styled.div`
   position: absolute;
-  top: 70px;
-  width: 10px;
-  height: 10px;
-  background: purple;
-  animation: ${pixel} 3s linear infinite;
+  top: 10%;
+  left: 20%;
+  width: 1000px;
+  height: 1000px;
 `;
 
-const MessageContainer = styled.div``;
+const getInput = () => {
+  return fetch("/input").then(res => res.json());
+};
 
 class App extends Component {
-  renderPixels() {
-    return <Pixel />;
+  constructor(props) {
+    super(props);
+    this.state = {
+      pixels: []
+    };
   }
+
+  componentDidMount() {
+    getInput().then(input => {
+      this.setState({ pixels: input.pixels });
+    });
+  }
+
+  renderPixel = pixel => {
+    return <Pixel />;
+  };
+
+  renderPixels() {
+    return this.state.pixels.map(this.renderPixel);
+  }
+
   render() {
+    console.log(this.state.pixels);
     return (
       <Container>
         Advent of code Dec 10th Calendar 2018
-        <Pixel />
+        <MessageContainer>
+          <Pixel />
+        </MessageContainer>
       </Container>
     );
   }
