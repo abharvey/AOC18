@@ -25,7 +25,7 @@ function dec8(input) {
   const numStrings = input[0].split(" ");
   const nums = numStrings.map(n => parseInt(n, 10));
   const metaSum = sumMetas(nums, 0, []); //?
-  //   console.log(heads);
+  console.log(heads);
   const headIndices = heads.reduce(
     (indices, head) => indices.concat(Object.keys(head)),
     []
@@ -42,7 +42,7 @@ function dec8(input) {
   console.log(sum);
 }
 
-getInput("./dec8.txt", dec8);
+getInput("./test8.txt", dec8);
 
 /*
 2 3 0 3 10 11 12 1 1 0  1 99  2  1  1  2
