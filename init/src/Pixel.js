@@ -2,29 +2,20 @@
 import styled, { keyframes } from "styled-components";
 
 const pixel = props => keyframes`
-    0% { left: 800px; top: 500px; }
+    0% { left: ${props.xStart}px; top: ${props.yStart}px; }
     100% { 
-        left: -100px; top: 200px;
-    }
-`;
-
-const computeDist = (pos, vel) => {};
-
-const pixelTemp = props => keyframes`
-    0% { left: ${props.xPos}px; top: ${props.yPos}px; }
-    100% { 
-        left: ${computeDist(props.xPos, props.xVel)}px; 
-        top: ${computeDist(props.xPos, props.xVel)}px;
+        left: ${props.xEnd}px; top: ${props.yEnd}px;
     }
 `;
 
 const Pixel = styled.div`
   position: absolute;
-  top: 70px;
-  width: 10px;
-  height: 10px;
+  top: ${props => props.yStart}px;
+  left: ${props => props.xStart}px;
+  width: 1px;
+  height: 1px;
   background: purple;
-  animation: ${props => pixel(props)} 3s linear infinite;
+  animation: ${props => pixel(props)} 60s linear infinite;
 `;
 
 export default Pixel;

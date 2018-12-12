@@ -105,14 +105,64 @@ module.exports = function(proxy, allowedHost) {
       app.use(errorOverlayMiddleware());
 
       app.get("/input", function(req, res) {
+        function getInput(filePath, callBack) {
+          const readInput = cb => (error, input) => {
+            if (error) {
+              console.error("ERROR:", error);
+            }
+            const inputArray = input.split("\n");
+            cb(inputArray);
+          };
+
+          fs.readFile(`${filePath}`, "UTF8", readInput(callBack));
+        }
+
+        const withEndPosition = p => {
+          const startDur = 10450;
+          const endDur = 10500;
+
+          const shift = 200;
+          const afterPix = {
+            xStart: p.xPos + p.xVel * startDur + shift,
+            yStart: p.yPos + p.yVel * startDur + shift,
+            xEnd: p.xPos + p.xVel * endDur + shift,
+            yEnd: p.yPos + p.yVel * endDur + shift
+          };
+          return afterPix;
+        };
+
+        const pixelIsConverging = p => {
+          if (
+            Math.abs(p.xPos + p.xVel) < Math.abs(p.xPos) &&
+            Math.abs(p.yPos + p.yVel) < Math.abs(p.yPos)
+          ) {
+            return true;
+          }
+          return false;
+        };
+
+        const waitUntilVisible = pixels => {
+          return pixels
+            .map(p => ({
+              xPos: p.position[0],
+              yPos: p.position[1],
+              xVel: p.velocity[0],
+              yVel: p.velocity[1]
+            }))
+            .filter(p => pixelIsConverging(p))
+            .map(p => withEndPosition(p));
+        };
+
         const pixelApi = lines => {
           const input = lines.reduce(
             (obj, line) => {
+              //   console.log(line);
               const pixel = line
                 .replace("position=<", "")
                 .replace(">", "")
                 .split(" velocity=<");
 
+              //   console.log(pixel);
               const position = pixel[0].split(", ").map(p => parseInt(p, 10));
               const velocity = pixel[1].split(", ").map(v => parseInt(v, 10));
               obj.pixels.push({
@@ -123,10 +173,14 @@ module.exports = function(proxy, allowedHost) {
             },
             { pixels: [] }
           );
-          res.send(input);
+
+          const pixels = waitUntilVisible(input.pixels);
+
+          // console.log(pixels);
+          res.send(pixels);
         };
 
-        getInput("config/api/testinput.txt", pixelApi);
+        getInput("config/api/input.txt", pixelApi);
       });
       // This service worker file is effectively a 'no-op' that will reset any
       // previous service worker registered for the same host:port combination.

@@ -4,16 +4,21 @@ import styled from "styled-components";
 import Pixel from "./Pixel";
 
 const Container = styled.div`
-  width: 100%;
-  height: 100%;
+  width: 1000px;
+  height: 1000px;
+  max-width: 1000px;
+  max-height: 1000px;
 `;
 
 const MessageContainer = styled.div`
   position: absolute;
-  top: 10%;
-  left: 20%;
-  width: 1000px;
-  height: 1000px;
+  background-color: blanchedalmond;
+  top: 100px;
+  left: 100px;
+  width: 800px;
+  height: 800px;
+  max-width: 800px;
+  max-height: 800px;
 `;
 
 const getInput = () => {
@@ -29,17 +34,19 @@ class App extends Component {
   }
 
   componentDidMount() {
-    getInput().then(input => {
-      this.setState({ pixels: input.pixels });
+    getInput().then(pixels => {
+      this.setState({ pixels });
     });
   }
 
-  renderPixel = pixel => {
-    return <Pixel />;
+  renderPixel = i => pixel => {
+    const key = `${i}-${pixel.xStart}`;
+
+    return <Pixel {...pixel} key={key} />;
   };
 
   renderPixels() {
-    return this.state.pixels.map(this.renderPixel);
+    return this.state.pixels.map((p, i) => this.renderPixel(i)(p));
   }
 
   render() {
@@ -47,9 +54,7 @@ class App extends Component {
     return (
       <Container>
         Advent of code Dec 10th Calendar 2018
-        <MessageContainer>
-          <Pixel />
-        </MessageContainer>
+        <MessageContainer>{this.renderPixels()}</MessageContainer>
       </Container>
     );
   }
