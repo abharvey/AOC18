@@ -1,4 +1,4 @@
-const { getInput } = require('./readInput');
+const { getInput } = require('../readInput');
 
 // manhattan distance is  the distance between two points is the sum of the absolute differences of their Cartesian coordinates.
 // two points (3, 5) & (5, 7) distance = (3-5, 5-7) = (2+2) = 4;

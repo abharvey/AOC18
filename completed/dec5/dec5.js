@@ -1,4 +1,4 @@
-const { getInput } = require("./readInput");
+const { getInput } = require("../readInput");
 
 function charShouldReact(leftChar, rightChar) {
     return leftChar.toUpperCase() === rightChar.toUpperCase() && leftChar !== rightChar;

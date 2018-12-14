@@ -1,4 +1,4 @@
-const { getInput } = require("./readInput.js");
+const { getInput } = require("../../readInput.js");
 const { playGame } = require("./dec9.js");
 const { p2 } = require("./dec92.js");
 

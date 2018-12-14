@@ -1,4 +1,25 @@
-const { getInput } = require("../readInput.js");
+const { getInput } = require("../../readInput.js");
+
+const spliceRem = function(circle, currentMarble, circleSize) {
+  let i = currentMarble;
+  while (i < circleSize) {
+    circle[i] = circle[i + 1];
+    i++;
+  }
+};
+
+const spliceAdd = function(circle, newMarblePosition, newMarble, circleSize) {
+  let i = newMarblePosition + 1;
+  let lastValue = circle[i - 1];
+  let tempValue = 0;
+  while (i < circleSize + 1) {
+    tempValue = circle[i];
+    circle[i] = lastValue;
+    lastValue = tempValue;
+    i++;
+  }
+  circle[newMarblePosition] = newMarble;
+};
 
 function getNextMarblePosition(currentMarble, circleLength) {
   //between the marbles that are 1 and 2 marbles clockwise of the current marble.
@@ -12,9 +33,8 @@ function getNextMarblePosition(currentMarble, circleLength) {
 
 function addMarbleToCircle(currentMarble, nextMarble, circle, circleSize) {
   const nextPosition = getNextMarblePosition(currentMarble, circleSize);
-
   //   ** Optimize ** don't use splice
-  circle.splice(nextPosition, 0, nextMarble);
+  spliceAdd(circle, nextPosition, nextMarble, circleSize);
   return { nextPosition };
 }
 
@@ -25,7 +45,7 @@ function remove7thMarble(currentMarble, circle, circleSize) {
   }
   const value = circle[seventh];
   // remove marble ** Optimize, don't use splice?
-  circle.splice(seventh, 1);
+  spliceRem(circle, seventh, circleSize);
   // new current was the marble clockwise to the one removed, same index as seventh
   if (seventh > circleSize) {
     seventh = seventh - circleSize;
@@ -39,17 +59,18 @@ function nextPlayer(currentPlayer, players) {
 
 const playGame = (playerCount, marbles) => {
   const startTime = Date.now();
-  const players = new Array(playerCount).fill(0); //?
+  const players = new Array(playerCount).fill(0);
   let currentPlayer = 0;
 
   let currentMarble = 0;
-  // we could pre-allocate, but splice is still the fastest insertion method for JS
-  const circle = new Array(marbles + 1); // pre allocate required memory
+  //   const roundTable = {};
+  // Pre-allocate and don't use build in splice
+  const circle = new Array(marbles + 1).fill(0); // pre allocate required memory
   let circleSize = 1; // size of array as the elves see the circle
   for (let i = 1; i < marbles + 1; i++) {
-    if (i % 10000 === 0) {
-      console.log(i / 10000, "...", (Date.now() - startTime) / 1000);
-    }
+    // if (i % 10000 === 0) {
+    //   console.log(i / 10000, "...", (Date.now() - startTime) / 1000);
+    // }
     //current player takes Turn
     if (i % 23 === 0) {
       // add to score
@@ -66,13 +87,18 @@ const playGame = (playerCount, marbles) => {
         circle,
         circleSize
       );
+
       circleSize++;
       currentMarble = placementResult.nextPosition;
     }
+
     currentPlayer = nextPlayer(currentPlayer, players);
+    // roundTable[i] = [...circle];
   }
+  //   console.table(roundTable);
   console.log((Date.now() - startTime) / 1000);
-  return players.sort().reverse()[0];
+  const score = players.sort().reverse()[0];
+  return score;
 };
 
 function dec9(input) {
@@ -83,10 +109,9 @@ function dec9(input) {
     .map(num => parseInt(num, 10));
 
   const score = playGame(...gameInput);
-  console.log(score);
 }
 
-playGame(455, 7122300);
+console.log(playGame(455, 71975));
 // getInput("./dec9.txt", dec9);
 
 module.exports = {

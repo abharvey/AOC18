@@ -1,4 +1,4 @@
-const { getInput } = require("./readInput");
+const { getInput } = require("../readInput");
 
 function getToFrom(line) {
     //Step B must be finished before step W can begin.

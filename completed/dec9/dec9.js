@@ -1,4 +1,4 @@
-const { getInput } = require("../readInput.js");
+const { getInput } = require("../../readInput.js");
 
 function getNextMarblePosition(currentMarble, circleLength) {
   //between the marbles that are 1 and 2 marbles clockwise of the current marble.

@@ -1,4 +1,4 @@
-const { getInput } = require("./readInput");
+const { getInput } = require("../../readInput");
 
 function willHavePlant(l1, l2, c, r1, r2, rule) {
   if (rule.plants.join("") === `${l1}${l2}${c}${r1}${r2}`) return rule.result;
